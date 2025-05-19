@@ -48,7 +48,10 @@ jobs:
     environment:
       name: 'Production'
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
-    
+    permissions:
+      id-token: write #This is required for requesting the JWT
+      contents: read #This is required for actions/checkout
+
     steps:
       - name: Download artifact from build job
         uses: actions/download-artifact@v4
@@ -58,6 +61,13 @@ jobs:
       - name: Unzip artifact for deployment
         run: unzip release.zip
       
+      - name: Login to Azure
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_5A98AE9135C54C279054FDDDB6B448FB }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_504E4F7C74904BE2A10FEE3B4E8AE42D }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_BFB8BE971F1D426F8CEB11DDB818F505 }}
+
       - name: 'Deploy to Azure Web App'
         uses: azure/webapps-deploy@v3
         id: deploy-to-webapp
@@ -65,4 +75,4 @@ jobs:
           app-name: 'kv6012-weatherdashboard'
           slot-name: 'Production'
           package: .
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_25C399A8589341D19F1A29E952A45C61 }}
+          
